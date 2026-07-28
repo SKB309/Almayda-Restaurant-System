@@ -3,6 +3,7 @@ import java.awt.*;
 
 public class EditOrderFrame extends JFrame {
 
+
     JTextField txtName;
     JTextField txtPhone;
     JTextField txtLocation;
@@ -16,22 +17,40 @@ public class EditOrderFrame extends JFrame {
     JTextField txtAdvance;
     JTextField txtDue;
 
+
+    JComboBox<String> cmbOrderType;
+    JComboBox<String> cmbPaymentMethod;
+    JComboBox<String> cmbPaymentStatus;
+
+
     JButton btnUpdate;
     JButton btnCalculate;
     JButton btnCancel;
 
+
     int billNumber;
 
 
+
     public EditOrderFrame(int billNumber) {
+
 
         this.billNumber = billNumber;
 
 
         setTitle("Edit Order");
-        setSize(600,650);
+
+        setSize(600,800);
+
         setLocationRelativeTo(null);
+
+        setDefaultCloseOperation(
+                JFrame.DISPOSE_ON_CLOSE
+        );
+
         setLayout(new BorderLayout());
+
+
 
 
         JLabel title = new JLabel(
@@ -39,17 +58,25 @@ public class EditOrderFrame extends JFrame {
                 SwingConstants.CENTER
         );
 
+
         title.setFont(
                 new Font("Arial", Font.BOLD, 22)
         );
+
 
         add(title, BorderLayout.NORTH);
 
 
 
+
+
+
         JPanel form = new JPanel();
 
-        form.setLayout(new GridLayout(0,2,10,10));
+        form.setLayout(
+                new GridLayout(0,2,10,10)
+        );
+
 
         form.setBorder(
                 BorderFactory.createEmptyBorder(
@@ -58,20 +85,74 @@ public class EditOrderFrame extends JFrame {
         );
 
 
+
+
+
         txtName = new JTextField();
+
         txtPhone = new JTextField();
+
         txtLocation = new JTextField();
+
 
         txtOrder = new JTextArea(3,20);
 
+
         txtDate = new JTextField();
+
         txtTime = new JTextField();
 
+
         txtPrice = new JTextField();
+
         txtAdvance = new JTextField();
 
+
         txtDue = new JTextField();
+
         txtDue.setEditable(false);
+
+
+
+
+
+        // Order Type
+
+        cmbOrderType = new JComboBox<>(
+                new String[]{
+                        "Pickup",
+                        "Delivery"
+                }
+        );
+
+
+
+        // Payment Method
+
+        cmbPaymentMethod = new JComboBox<>(
+                new String[]{
+                        "None",
+                        "Cash",
+                        "Card",
+                        "Online"
+                }
+        );
+
+
+
+        // Payment Status
+
+        cmbPaymentStatus = new JComboBox<>(
+                new String[]{
+                        "Pending",
+                        "Partially Paid",
+                        "Paid"
+                }
+        );
+
+
+
+
 
 
 
@@ -79,32 +160,43 @@ public class EditOrderFrame extends JFrame {
         form.add(txtName);
 
 
+
         form.add(new JLabel("Phone Number"));
         form.add(txtPhone);
+
 
 
         form.add(new JLabel("Location"));
         form.add(txtLocation);
 
 
+
+
         form.add(new JLabel("Order Details"));
         form.add(new JScrollPane(txtOrder));
+
+
 
 
         form.add(new JLabel("Date"));
         form.add(txtDate);
 
 
+
         form.add(new JLabel("Time"));
         form.add(txtTime);
+
+
 
 
         form.add(new JLabel("Total Price"));
         form.add(txtPrice);
 
 
+
         form.add(new JLabel("Advance"));
         form.add(txtAdvance);
+
 
 
         form.add(new JLabel("Due"));
@@ -112,22 +204,52 @@ public class EditOrderFrame extends JFrame {
 
 
 
+
+        form.add(new JLabel("Order Type"));
+        form.add(cmbOrderType);
+
+
+
+        form.add(new JLabel("Payment Method"));
+        form.add(cmbPaymentMethod);
+
+
+
+        form.add(new JLabel("Payment Status"));
+        form.add(cmbPaymentStatus);
+
+
+
+
+
         add(form, BorderLayout.CENTER);
+
+
+
 
 
 
         JPanel buttons = new JPanel();
 
 
-        btnCalculate = new JButton("Calculate Due");
 
-        btnUpdate = new JButton("Update");
+        btnCalculate =
+                new JButton("Calculate Due");
 
-        btnCancel = new JButton("Cancel");
+
+        btnUpdate =
+                new JButton("Update");
+
+
+        btnCancel =
+                new JButton("Cancel");
+
 
 
         buttons.add(btnCalculate);
+
         buttons.add(btnUpdate);
+
         buttons.add(btnCancel);
 
 
@@ -136,11 +258,15 @@ public class EditOrderFrame extends JFrame {
 
 
 
+
+
+
+
         loadOrder();
 
 
 
-        // Calculate Due Button
+
 
         btnCalculate.addActionListener(e -> {
 
@@ -150,7 +276,6 @@ public class EditOrderFrame extends JFrame {
 
 
 
-        // Update Button
 
         btnUpdate.addActionListener(e -> {
 
@@ -160,7 +285,6 @@ public class EditOrderFrame extends JFrame {
 
 
 
-        // Cancel Button
 
         btnCancel.addActionListener(e -> {
 
@@ -170,36 +294,56 @@ public class EditOrderFrame extends JFrame {
 
 
 
+
+
         setVisible(true);
+
 
     }
 
 
 
-    // Load selected order
+
+
+
+
+    // =========================
+    // LOAD ORDER
+    // =========================
+
 
     private void loadOrder() {
+
 
 
         Order order =
                 OrderManager.findOrder(billNumber);
 
 
+
         if(order == null) {
+
 
             JOptionPane.showMessageDialog(
                     this,
                     "Order not found"
             );
 
+
             dispose();
+
             return;
 
         }
 
 
+
+
+
         Customer customer =
                 order.getCustomer();
+
+
 
 
         txtName.setText(
@@ -252,12 +396,36 @@ public class EditOrderFrame extends JFrame {
                 )
         );
 
+
+
+        cmbOrderType.setSelectedItem(
+                order.getOrderType()
+        );
+
+
+        cmbPaymentMethod.setSelectedItem(
+                order.getPaymentMethod()
+        );
+
+
+        cmbPaymentStatus.setSelectedItem(
+                order.getPaymentStatus()
+        );
+
+
     }
 
 
 
 
-    // Calculate Due
+
+
+
+
+    // =========================
+    // CALCULATE DUE
+    // =========================
+
 
     private void calculateDue() {
 
@@ -277,6 +445,7 @@ public class EditOrderFrame extends JFrame {
                     );
 
 
+
             txtDue.setText(
                     String.valueOf(
                             price - advance
@@ -293,7 +462,9 @@ public class EditOrderFrame extends JFrame {
                     "Enter valid numbers"
             );
 
+
         }
+
 
     }
 
@@ -301,59 +472,111 @@ public class EditOrderFrame extends JFrame {
 
 
 
-    // Save Changes
+
+
+
+
+    // =========================
+    // UPDATE ORDER
+    // =========================
+
 
     private void updateOrder() {
 
 
-        Customer customer =
-                new Customer(
-                        txtName.getText(),
-                        txtPhone.getText(),
-                        txtLocation.getText()
-                );
+
+        try {
 
 
 
-        Order updatedOrder =
-                new Order(
+            Customer customer =
 
-                        customer,
-
-                        billNumber,
-
-                        txtOrder.getText(),
-
-                        txtDate.getText(),
-
-                        txtTime.getText(),
-
-                        Double.parseDouble(
-                                txtPrice.getText()
-                        ),
-
-                        Double.parseDouble(
-                                txtAdvance.getText()
-                        )
-
-                );
+                    new Customer(
+                            txtName.getText(),
+                            txtPhone.getText(),
+                            txtLocation.getText()
+                    );
 
 
 
-        OrderManager.updateOrder(
-                updatedOrder
-        );
+
+
+            Order updatedOrder =
+
+                    new Order(
+
+                            customer,
+
+                            billNumber,
+
+                            txtOrder.getText(),
+
+                            txtDate.getText(),
+
+                            txtTime.getText(),
+
+                            Double.parseDouble(
+                                    txtPrice.getText()
+                            ),
+
+                            Double.parseDouble(
+                                    txtAdvance.getText()
+                            ),
+
+                            cmbPaymentMethod
+                                    .getSelectedItem()
+                                    .toString(),
+
+                            cmbPaymentStatus
+                                    .getSelectedItem()
+                                    .toString(),
+
+                            cmbOrderType
+                                    .getSelectedItem()
+                                    .toString()
+
+                    );
 
 
 
-        JOptionPane.showMessageDialog(
-                this,
-                "Order Updated Successfully"
-        );
 
 
-        dispose();
+
+            OrderManager.updateOrder(
+                    updatedOrder
+            );
+
+
+
+
+
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Order Updated Successfully"
+            );
+
+
+
+            dispose();
+
+
+
+        }
+        catch(Exception e){
+
+
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Error: " + e.getMessage()
+            );
+
+
+        }
+
+
 
     }
+
+
 
 }

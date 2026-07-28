@@ -12,14 +12,22 @@ public class NewOrderFrame extends JFrame {
     JTextField txtName;
     JTextField txtPhone;
     JTextField txtLocation;
+
     JTextField txtOrder;
     JTextField txtTime;
+
     JTextField txtPrice;
     JTextField txtAdvance;
     JTextField txtDue;
 
 
     JDateChooser dateChooser;
+
+
+    JComboBox<String> cmbOrderType;
+    JComboBox<String> cmbPaymentMethod;
+    JComboBox<String> cmbPaymentStatus;
+
 
 
     JButton btnSave;
@@ -29,19 +37,30 @@ public class NewOrderFrame extends JFrame {
 
 
 
+
+
     public NewOrderFrame() {
 
 
         setTitle("New Order");
-        setSize(550,650);
+
+        setSize(550,750);
+
         setLocationRelativeTo(null);
-        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+
+        setDefaultCloseOperation(
+                JFrame.DISPOSE_ON_CLOSE
+        );
 
 
 
         JPanel panel = new JPanel();
 
-        panel.setLayout(new GridLayout(0,2,10,10));
+        panel.setLayout(
+                new GridLayout(0,2,10,10)
+        );
+
+
 
 
 
@@ -50,7 +69,10 @@ public class NewOrderFrame extends JFrame {
         // ======================
 
 
-        panel.add(new JLabel("Customer Name"));
+        panel.add(
+                new JLabel("Customer Name")
+        );
+
 
         txtName = new JTextField();
 
@@ -58,7 +80,11 @@ public class NewOrderFrame extends JFrame {
 
 
 
-        panel.add(new JLabel("Phone Number"));
+
+        panel.add(
+                new JLabel("Phone Number")
+        );
+
 
         txtPhone = new JTextField();
 
@@ -66,11 +92,17 @@ public class NewOrderFrame extends JFrame {
 
 
 
-        panel.add(new JLabel("Location"));
+
+        panel.add(
+                new JLabel("Location")
+        );
+
 
         txtLocation = new JTextField();
 
         panel.add(txtLocation);
+
+
 
 
 
@@ -80,7 +112,10 @@ public class NewOrderFrame extends JFrame {
         // ======================
 
 
-        panel.add(new JLabel("Order Details"));
+        panel.add(
+                new JLabel("Order Details")
+        );
+
 
         txtOrder = new JTextField();
 
@@ -89,24 +124,62 @@ public class NewOrderFrame extends JFrame {
 
 
 
+
+
         // ======================
-        // Date Calendar
+        // Order Type
         // ======================
 
 
-        panel.add(new JLabel("Order Date"));
+        panel.add(
+                new JLabel("Order Type")
+        );
 
 
-        dateChooser = new JDateChooser();
+        cmbOrderType = new JComboBox<>(
+                new String[]{
+                        "Pickup",
+                        "Delivery"
+                }
+        );
 
-        dateChooser.setDate(new Date());
+
+        panel.add(cmbOrderType);
+
+
+
+
+
+
+
+        // ======================
+        // Date
+        // ======================
+
+
+        panel.add(
+                new JLabel("Order Date")
+        );
+
+
+        dateChooser =
+                new JDateChooser();
+
+
+        dateChooser.setDate(
+                new Date()
+        );
+
 
         dateChooser.setDateFormatString(
-                "EEEE، dd-MM-yyyy"
+                "EEEE, dd-MM-yyyy"
         );
 
 
         panel.add(dateChooser);
+
+
+
 
 
 
@@ -116,11 +189,19 @@ public class NewOrderFrame extends JFrame {
         // ======================
 
 
-        panel.add(new JLabel("Time"));
+        panel.add(
+                new JLabel("Time")
+        );
+
 
         txtTime = new JTextField();
 
+
         panel.add(txtTime);
+
+
+
+
 
 
 
@@ -130,7 +211,10 @@ public class NewOrderFrame extends JFrame {
         // ======================
 
 
-        panel.add(new JLabel("Total Price"));
+        panel.add(
+                new JLabel("Total Price")
+        );
+
 
         txtPrice = new JTextField();
 
@@ -139,7 +223,10 @@ public class NewOrderFrame extends JFrame {
 
 
 
-        panel.add(new JLabel("Advance"));
+        panel.add(
+                new JLabel("Advance")
+        );
+
 
         txtAdvance = new JTextField();
 
@@ -148,13 +235,78 @@ public class NewOrderFrame extends JFrame {
 
 
 
-        panel.add(new JLabel("Due"));
+        panel.add(
+                new JLabel("Due")
+        );
+
 
         txtDue = new JTextField();
 
         txtDue.setEditable(false);
 
         panel.add(txtDue);
+
+
+
+
+
+
+
+
+        // ======================
+        // Payment Method
+        // ======================
+
+
+        panel.add(
+                new JLabel("Payment Method")
+        );
+
+
+        cmbPaymentMethod = new JComboBox<>(
+                new String[]{
+                        "None",
+                        "Cash",
+                        "Card",
+                        "Online"
+                }
+        );
+
+
+        panel.add(cmbPaymentMethod);
+
+
+
+
+
+
+
+
+        // ======================
+        // Payment Status
+        // ======================
+
+
+        panel.add(
+                new JLabel("Payment Status")
+        );
+
+
+        cmbPaymentStatus = new JComboBox<>(
+                new String[]{
+                        "Pending",
+                        "Partially Paid",
+                        "Paid"
+                }
+        );
+
+
+        panel.add(cmbPaymentStatus);
+
+
+
+
+
 
 
 
@@ -196,10 +348,13 @@ public class NewOrderFrame extends JFrame {
 
 
 
-        // ======================
-        // Button Actions
-        // ======================
 
+
+
+
+        // ======================
+        // Actions
+        // ======================
 
 
         btnCalculate.addActionListener(e -> {
@@ -207,6 +362,7 @@ public class NewOrderFrame extends JFrame {
             calculateDue();
 
         });
+
 
 
 
@@ -220,6 +376,7 @@ public class NewOrderFrame extends JFrame {
 
 
 
+
         btnClear.addActionListener(e -> {
 
             clearFields();
@@ -229,39 +386,11 @@ public class NewOrderFrame extends JFrame {
 
 
 
+
         btnBack.addActionListener(e -> {
 
 
-            if (!txtName.getText().isEmpty()
-                    || !txtOrder.getText().isEmpty()
-                    || !txtPrice.getText().isEmpty()) {
-
-
-                int result = JOptionPane.showConfirmDialog(
-                        this,
-                        "There is an unsaved order. Save before leaving?",
-                        "Unsaved Order",
-                        JOptionPane.YES_NO_CANCEL_OPTION
-                );
-
-
-                if (result == JOptionPane.YES_OPTION) {
-
-                    saveOrder();
-
-                }
-                else if (result == JOptionPane.NO_OPTION) {
-
-                    dispose();
-
-                }
-
-
-            } else {
-
-                dispose();
-
-            }
+            dispose();
 
 
         });
@@ -269,7 +398,10 @@ public class NewOrderFrame extends JFrame {
 
 
 
+
+
         setVisible(true);
+
 
     }
 
@@ -279,9 +411,6 @@ public class NewOrderFrame extends JFrame {
 
 
 
-    // ======================
-    // Calculate Due
-    // ======================
 
 
     private void calculateDue() {
@@ -302,19 +431,16 @@ public class NewOrderFrame extends JFrame {
                     );
 
 
-            double due =
-                    price - advance;
-
-
 
             txtDue.setText(
-                    String.valueOf(due)
+                    String.valueOf(
+                            price - advance
+                    )
             );
 
 
-
         }
-        catch(Exception e){
+        catch(Exception e) {
 
 
             JOptionPane.showMessageDialog(
@@ -335,10 +461,6 @@ public class NewOrderFrame extends JFrame {
 
 
 
-    // ======================
-    // Save Order
-    // ======================
-
 
     private void saveOrder() {
 
@@ -351,12 +473,13 @@ public class NewOrderFrame extends JFrame {
             String date =
 
                     new SimpleDateFormat(
-                            "EEEE، dd-MM-yyyy",
+                            "EEEE, dd-MM-yyyy",
                             new Locale("ar")
                     )
                             .format(
                                     dateChooser.getDate()
                             );
+
 
 
 
@@ -372,11 +495,14 @@ public class NewOrderFrame extends JFrame {
 
 
 
+
+
             double price =
 
                     Double.parseDouble(
                             txtPrice.getText()
                     );
+
 
 
 
@@ -390,6 +516,40 @@ public class NewOrderFrame extends JFrame {
 
 
 
+
+
+            String orderType =
+
+                    cmbOrderType
+                            .getSelectedItem()
+                            .toString();
+
+
+
+
+
+            String paymentMethod =
+
+                    cmbPaymentMethod
+                            .getSelectedItem()
+                            .toString();
+
+
+
+
+
+            String paymentStatus =
+
+                    cmbPaymentStatus
+                            .getSelectedItem()
+                            .toString();
+
+
+
+
+
+
+
             int billNumber =
 
                     OrderManager.generateOrderNumber();
@@ -399,23 +559,41 @@ public class NewOrderFrame extends JFrame {
 
 
 
+
             Order order =
 
                     new Order(
+
                             customer,
+
                             billNumber,
+
                             txtOrder.getText(),
+
                             date,
+
                             txtTime.getText(),
+
                             price,
-                            advance
+
+                            advance,
+
+                            paymentMethod,
+
+                            paymentStatus,
+
+                            orderType
+
                     );
 
 
 
 
 
+
             OrderManager.addOrder(order);
+
+
 
 
 
@@ -433,8 +611,9 @@ public class NewOrderFrame extends JFrame {
 
 
 
+
         }
-        catch(Exception e){
+        catch(Exception e) {
 
 
 
@@ -448,7 +627,6 @@ public class NewOrderFrame extends JFrame {
         }
 
 
-
     }
 
 
@@ -458,12 +636,8 @@ public class NewOrderFrame extends JFrame {
 
 
 
-    // ======================
-    // Clear Fields
-    // ======================
 
-
-    private void clearFields(){
+    private void clearFields() {
 
 
         txtName.setText("");
@@ -481,6 +655,17 @@ public class NewOrderFrame extends JFrame {
         txtAdvance.setText("");
 
         txtDue.setText("");
+
+
+
+        cmbOrderType.setSelectedIndex(0);
+
+        cmbPaymentMethod.setSelectedIndex(0);
+
+        cmbPaymentStatus.setSelectedIndex(0);
+
+
+
 
         dateChooser.setDate(
                 new Date()
