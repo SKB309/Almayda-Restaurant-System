@@ -7,6 +7,8 @@ import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.DocumentFilter;
 import java.awt.*;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -20,7 +22,7 @@ public class NewOrderFrame extends JFrame {
     private JTextField txtOrder, txtTime;
     private JTextField txtPrice, txtAdvance, txtDue;
     private JDateChooser dateChooser;
-    private JComboBox<String> cmbOrderType, cmbPaymentMethod, cmbPaymentStatus;
+    private JComboBox<String> cmbOrderType, cmbPaymentMethod, cmbPaymentStatus, cmbAmPm;
     private JButton btnSave, btnCalculate, btnClear, btnBack;
 
     private Border defaultBorder;
@@ -30,7 +32,13 @@ public class NewOrderFrame extends JFrame {
         setTitle("New Order - Almayda");
         setSize(550, 750);
         setLocationRelativeTo(null);
-        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+        addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+                confirmExitOrBack();
+            }
+        });
 
         JPanel panel = new JPanel();
         panel.setLayout(new GridLayout(0, 2, 10, 10));
@@ -45,12 +53,12 @@ public class NewOrderFrame extends JFrame {
         txtPhone = new JTextField();
         panel.add(txtPhone);
 
-        // Limit txtPhone input to max 8 digits in real-time
+        // Limit txtPhone input to max 8 digits in real-time and allow clearing
         ((AbstractDocument) txtPhone.getDocument()).setDocumentFilter(new DocumentFilter() {
             @Override
             public void insertString(FilterBypass fb, int offset, String string, AttributeSet attr) throws BadLocationException {
                 if (string == null) return;
-                if ((fb.getDocument().getLength() + string.length()) <= 8 && string.matches("\\d+")) {
+                if ((fb.getDocument().getLength() + string.length()) <= 8 && (string.isEmpty() || string.matches("\\d+"))) {
                     super.insertString(fb, offset, string, attr);
                 }
             }
@@ -59,7 +67,7 @@ public class NewOrderFrame extends JFrame {
             public void replace(FilterBypass fb, int offset, int length, String text, AttributeSet attrs) throws BadLocationException {
                 if (text == null) return;
                 int newLength = fb.getDocument().getLength() - length + text.length();
-                if (newLength <= 8 && text.matches("\\d+")) {
+                if (newLength <= 8 && (text.isEmpty() || text.matches("\\d+"))) {
                     super.replace(fb, offset, length, text, attrs);
                 }
             }
@@ -80,16 +88,21 @@ public class NewOrderFrame extends JFrame {
         cmbOrderType = new JComboBox<>(new String[]{"Pickup", "Delivery"});
         panel.add(cmbOrderType);
 
-        // Date & Time
+        // Date & Time (Manual Order Date for past/future orders)
         panel.add(new JLabel("Order Date:"));
         dateChooser = new JDateChooser();
         dateChooser.setDate(new Date());
         dateChooser.setDateFormatString("EEEE, dd-MM-yyyy");
         panel.add(dateChooser);
 
-        panel.add(new JLabel("Time:"));
-        txtTime = new JTextField();
-        panel.add(txtTime);
+        panel.add(new JLabel("Time (12-Hour):"));
+        JPanel timePanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
+        txtTime = new JTextField(10);
+        cmbAmPm = new JComboBox<>(new String[]{"AM", "PM"});
+        timePanel.add(txtTime);
+        timePanel.add(Box.createHorizontalStrut(5));
+        timePanel.add(cmbAmPm);
+        panel.add(timePanel);
 
         // Payment Info
         panel.add(new JLabel("Total Price (OMR):"));
@@ -127,6 +140,9 @@ public class NewOrderFrame extends JFrame {
 
         add(panel);
 
+        // Enable Enter key to trigger Save Order automatically
+        getRootPane().setDefaultButton(btnSave);
+
         // Automatic Calculation Listeners
         DocumentListener autoCalcListener = new DocumentListener() {
             public void insertUpdate(DocumentEvent e) { calculateDue(); }
@@ -140,7 +156,7 @@ public class NewOrderFrame extends JFrame {
         btnCalculate.addActionListener(e -> calculateDue());
         btnSave.addActionListener(e -> saveOrder());
         btnClear.addActionListener(e -> clearFields());
-        btnBack.addActionListener(e -> dispose());
+        btnBack.addActionListener(e -> confirmExitOrBack());
 
         setVisible(true);
     }
@@ -181,6 +197,28 @@ public class NewOrderFrame extends JFrame {
 
         } catch (NumberFormatException e) {
             txtDue.setText("Invalid input");
+        }
+    }
+
+    private void confirmExitOrBack() {
+        Object[] options = {"حفظ (Save)", "متابعة (Continue)", "خروج بدون حفظ (Exit without saving)"};
+        int choice = JOptionPane.showOptionDialog(
+                this,
+                "هل تريد حفظ الطلب، العودة للمتابعة، أم الخروج؟\nDo you want to save the order, go back to continue, or exit?",
+                "تأكيد الخروج / Confirm Exit",
+                JOptionPane.YES_NO_CANCEL_OPTION,
+                JOptionPane.QUESTION_MESSAGE,
+                null,
+                options,
+                options[1]
+        );
+
+        if (choice == 0) {
+            saveOrder();
+        } else if (choice == 1) {
+            // Continue filling form, do nothing
+        } else if (choice == 2 || choice == JOptionPane.CLOSED_OPTION) {
+            dispose();
         }
     }
 
@@ -280,6 +318,14 @@ public class NewOrderFrame extends JFrame {
             }
         }
 
+        // 8. Payment Method Validation based on Advance Payment
+        String paymentMethod = cmbPaymentMethod.getSelectedItem().toString();
+        if (advanceVal > 0 && "None".equalsIgnoreCase(paymentMethod)) {
+            errors.add("يجب اختيار طريقة الدفع عند وجود دفعة مقدمة / Payment method is required when advance payment is made");
+        } else if (advanceVal == 0 && !"None".equalsIgnoreCase(paymentMethod)) {
+            errors.add("لا يمكن اختيار طريقة دفع إذا لم يتم دفع مبلغ مقدم / Payment method must be None if no advance payment is made");
+        }
+
         // If there are validation errors, display popup and highlight fields
         if (!errors.isEmpty()) {
             StringBuilder message = new StringBuilder("يرجى تصحيح الأخطاء التالية:\n\n");
@@ -303,7 +349,8 @@ public class NewOrderFrame extends JFrame {
         // Save Order Execution
         try {
             Date selectedDate = dateChooser.getDate() != null ? dateChooser.getDate() : new Date();
-            String date = new SimpleDateFormat("EEEE, dd-MM-yyyy", new Locale("ar")).format(selectedDate);
+            String orderDate = new SimpleDateFormat("EEEE, dd-MM-yyyy", new Locale("ar")).format(selectedDate);
+            String registrationTimestamp = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(new Date());
 
             Customer customer = new Customer(
                     name,
@@ -312,8 +359,8 @@ public class NewOrderFrame extends JFrame {
             );
 
             String orderType = cmbOrderType.getSelectedItem().toString();
-            String paymentMethod = cmbPaymentMethod.getSelectedItem().toString();
             String paymentStatus = cmbPaymentStatus.getSelectedItem().toString();
+            String fullTime = txtTime.getText().trim() + " " + cmbAmPm.getSelectedItem().toString();
 
             int billNumber = OrderManager.generateOrderNumber();
 
@@ -321,8 +368,8 @@ public class NewOrderFrame extends JFrame {
                     customer,
                     billNumber,
                     txtOrder.getText().trim(),
-                    date,
-                    txtTime.getText().trim(),
+                    orderDate,
+                    fullTime,
                     priceVal,
                     advanceVal,
                     paymentMethod,
@@ -369,6 +416,7 @@ public class NewOrderFrame extends JFrame {
         cmbOrderType.setSelectedIndex(0);
         cmbPaymentMethod.setSelectedIndex(0);
         cmbPaymentStatus.setSelectedIndex(0);
+        cmbAmPm.setSelectedIndex(0);
 
         dateChooser.setDate(new Date());
     }
