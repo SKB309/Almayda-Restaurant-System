@@ -11,8 +11,10 @@ import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import com.toedter.calendar.JDateChooser;
 
 public class NewOrderFrame extends JFrame {
@@ -34,14 +36,12 @@ public class NewOrderFrame extends JFrame {
     private JComboBox<String> riceDishCombo;
     private JSpinner riceMunSpinner;
 
-    // Unified Dynamic Protein Section Components
-    private Map<String, JRadioButton> proteinRadioMap;
+    // Unified Protein Section Components
+    private JRadioButton rbBeef, rbChicken, rbFish, rbMutton;
     private ButtonGroup proteinGroup;
-    private JPanel radioPanel;
 
-    private JLabel lblProteinDish, lblProteinQty, lblMuttonSize;
+    private JLabel lblProteinDish, lblProteinQty;
     private JComboBox<String> proteinDishCombo;
-    private JComboBox<String> muttonSizeCombo;
     private JSpinner proteinMunSpinner;
 
     private JCheckBox proteinCustomerProvidedCheck;
@@ -55,7 +55,7 @@ public class NewOrderFrame extends JFrame {
         this.orderCalculator = new CateringOrderCalculator(priceManager);
 
         setTitle("New Order - Almayda");
-        setSize(650, 920);
+        setSize(650, 850);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
         addWindowListener(new WindowAdapter() {
@@ -108,46 +108,40 @@ public class NewOrderFrame extends JFrame {
         panel.add(new JLabel(""));
 
         panel.add(new JLabel("نوع العيش (Rice Dish):"));
-        riceDishCombo = new JComboBox<>(orderCalculator.getRiceDishTypes().toArray(new String[0]));
+        riceDishCombo = new JComboBox<>(CateringOrderCalculator.RICE_DISH_TYPES);
         panel.add(riceDishCombo);
 
         panel.add(new JLabel("كمية العيش (من / Mun):"));
-        riceMunSpinner = new JSpinner(new SpinnerNumberModel(0, 0, 100, 1));
+        riceMunSpinner = new JSpinner(new SpinnerNumberModel(1, 1, 100, 1));
         panel.add(riceMunSpinner);
 
-        // --- Unified Dynamic Protein Section ---
+        // --- Unified Protein Section ---
         panel.add(new JLabel("--- قسم البروتين (Protein Section) ---"));
         panel.add(new JLabel(""));
 
         panel.add(new JLabel("اختر نوع البروتين:"));
-        radioPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));
+        JPanel radioPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));
+        rbBeef = new JRadioButton("بقر", true);
+        rbChicken = new JRadioButton("دجاج");
+        rbFish = new JRadioButton("سمك");
+        rbMutton = new JRadioButton("ضأن");
         proteinGroup = new ButtonGroup();
-        proteinRadioMap = new LinkedHashMap<>();
-
-        List<String> proteinTypes = priceManager.getProteinTypes();
-        for (int i = 0; i < proteinTypes.size(); i++) {
-            String pType = proteinTypes.get(i);
-            JRadioButton rb = new JRadioButton(pType, i == 0);
-            proteinGroup.add(rb);
-            proteinRadioMap.put(pType, rb);
-            radioPanel.add(rb);
-            rb.addActionListener(e -> updateProteinUI());
-        }
+        proteinGroup.add(rbBeef);
+        proteinGroup.add(rbChicken);
+        proteinGroup.add(rbFish);
+        proteinGroup.add(rbMutton);
+        radioPanel.add(rbBeef);
+        radioPanel.add(rbChicken);
+        radioPanel.add(rbFish);
+        radioPanel.add(rbMutton);
         panel.add(radioPanel);
 
-        // Protein Dish (Style) Component
-        lblProteinDish = new JLabel("نوع طبق البروتين (Dish):");
+        lblProteinDish = new JLabel("نوع طبق البقر (Beef Dish):");
         panel.add(lblProteinDish);
-        proteinDishCombo = new JComboBox<>(orderCalculator.getBeefChickenDishTypes().toArray(new String[0]));
+        proteinDishCombo = new JComboBox<>(CateringOrderCalculator.MEAT_DISH_TYPES);
         panel.add(proteinDishCombo);
 
-        // Mutton Size Component (Specific to Mutton)
-        lblMuttonSize = new JLabel("حجم الضأن (Mutton Size):");
-        panel.add(lblMuttonSize);
-        muttonSizeCombo = new JComboBox<>(CateringOrderCalculator.MUTTON_SIZES);
-        panel.add(muttonSizeCombo);
-
-        lblProteinQty = new JLabel("كمية البروتين (من / Mun):");
+        lblProteinQty = new JLabel("كمية البقر (من / Mun):");
         panel.add(lblProteinQty);
 
         proteinMunSpinner = new JSpinner(new SpinnerNumberModel(0, 0, 100, 1));
@@ -157,8 +151,38 @@ public class NewOrderFrame extends JFrame {
         proteinCustomerProvidedCheck = new JCheckBox("Customer Provided");
         panel.add(proteinCustomerProvidedCheck);
 
-        // Rice Dish selection listener
-        riceDishCombo.addActionListener(e -> updateProteinUI());
+        // Radio button listeners (Stable layout without shifting)
+        ActionListener proteinToggleListener = e -> {
+            if (rbBeef.isSelected()) {
+                lblProteinDish.setText("نوع طبق البقر (Beef Dish):");
+                proteinDishCombo.setModel(new DefaultComboBoxModel<>(CateringOrderCalculator.MEAT_DISH_TYPES));
+                lblProteinQty.setText("كمية البقر (من / Mun):");
+                proteinCustomerProvidedCheck.setEnabled(true);
+            } else if (rbChicken.isSelected()) {
+                lblProteinDish.setText("نوع طبق الدجاج (Chicken Dish):");
+                proteinDishCombo.setModel(new DefaultComboBoxModel<>(CateringOrderCalculator.CHICKEN_DISH_TYPES));
+                lblProteinQty.setText("كمية الدجاج (من / Mun):");
+                proteinCustomerProvidedCheck.setEnabled(true);
+            } else if (rbFish.isSelected()) {
+                lblProteinDish.setText("نوع طبق السمك (Fish Dish):");
+                proteinDishCombo.setModel(new DefaultComboBoxModel<>(new String[]{"سمك مشوي"}));
+                lblProteinQty.setText("كمية السمك (من / Mun):");
+                proteinCustomerProvidedCheck.setEnabled(false);
+                proteinCustomerProvidedCheck.setSelected(false);
+            } else if (rbMutton.isSelected()) {
+                lblProteinDish.setText("حجم الضأن (Mutton Size):");
+                proteinDishCombo.setModel(new DefaultComboBoxModel<>(CateringOrderCalculator.MUTTON_SIZES));
+                lblProteinQty.setText("عدد الذبائح (Quantity):");
+                proteinCustomerProvidedCheck.setEnabled(true);
+            }
+
+            calculateCateringAndDue();
+        };
+
+        rbBeef.addActionListener(proteinToggleListener);
+        rbChicken.addActionListener(proteinToggleListener);
+        rbFish.addActionListener(proteinToggleListener);
+        rbMutton.addActionListener(proteinToggleListener);
         // ---------------------------------
 
         // Order Details
@@ -223,9 +247,9 @@ public class NewOrderFrame extends JFrame {
         getRootPane().setDefaultButton(btnSave);
 
         // Listeners for auto-calculation
+        riceDishCombo.addActionListener(e -> calculateCateringAndDue());
         riceMunSpinner.addChangeListener(e -> calculateCateringAndDue());
         proteinDishCombo.addActionListener(e -> calculateCateringAndDue());
-        muttonSizeCombo.addActionListener(e -> calculateCateringAndDue());
         proteinMunSpinner.addChangeListener(e -> calculateCateringAndDue());
         proteinCustomerProvidedCheck.addActionListener(e -> calculateCateringAndDue());
 
@@ -242,80 +266,13 @@ public class NewOrderFrame extends JFrame {
         btnClear.addActionListener(e -> clearFields());
         btnBack.addActionListener(e -> confirmExitOrBack());
 
-        updateProteinUI();
-        setVisible(true);
-    }
-
-    private void updateProteinUI() {
-        String selectedRice = riceDishCombo.getSelectedItem() != null ? riceDishCombo.getSelectedItem().toString().trim() : "";
-        boolean isStandaloneRice = selectedRice.equals("هريس") || selectedRice.equals("عرسية") || selectedRice.equals("ثريد");
-
-        // Hide Fish option completely when Harees, Areesia, or Thareed is selected
-        JRadioButton rbFish = proteinRadioMap.get("سمك");
-        if (rbFish != null) {
-            rbFish.setVisible(!isStandaloneRice);
-            if (isStandaloneRice && rbFish.isSelected()) {
-                for (Map.Entry<String, JRadioButton> entry : proteinRadioMap.entrySet()) {
-                    if (entry.getValue().isVisible()) {
-                        entry.getValue().setSelected(true);
-                        break;
-                    }
-                }
-            }
-        }
-
-        String selectedProtein = "";
-        for (Map.Entry<String, JRadioButton> entry : proteinRadioMap.entrySet()) {
-            if (entry.getValue().isSelected()) {
-                selectedProtein = entry.getKey();
-                break;
-            }
-        }
-
-        boolean isFish = selectedProtein.equals("سمك");
-        boolean isMutton = selectedProtein.equals("ضأن");
-
-        if (isFish) {
-            lblProteinDish.setText("نوع طبق السمك (Fish Dish):");
-            proteinDishCombo.setModel(new DefaultComboBoxModel<>(orderCalculator.getFishDishTypes()));
-            lblProteinQty.setText("كمية السمك (من / Mun):");
-            proteinCustomerProvidedCheck.setEnabled(false);
-            proteinCustomerProvidedCheck.setSelected(false);
-
-            lblProteinDish.setVisible(!isStandaloneRice);
-            proteinDishCombo.setVisible(!isStandaloneRice);
-            lblMuttonSize.setVisible(false);
-            muttonSizeCombo.setVisible(false);
-
-        } else if (isMutton) {
-            lblProteinDish.setText("نوع طبق الضأن (Mutton Dish):");
-            proteinDishCombo.setModel(new DefaultComboBoxModel<>(orderCalculator.getBeefChickenDishTypes().toArray(new String[0])));
-            lblProteinQty.setText("عدد الذبائح (Quantity):");
-            proteinCustomerProvidedCheck.setEnabled(true);
-
-            lblProteinDish.setVisible(!isStandaloneRice);
-            proteinDishCombo.setVisible(!isStandaloneRice);
-            lblMuttonSize.setVisible(true);
-            muttonSizeCombo.setVisible(true);
-
-        } else {
-            lblProteinDish.setText("نوع طبق " + selectedProtein + " (Dish):");
-            proteinDishCombo.setModel(new DefaultComboBoxModel<>(orderCalculator.getBeefChickenDishTypes().toArray(new String[0])));
-            lblProteinQty.setText("كمية " + selectedProtein + " (من / Mun):");
-            proteinCustomerProvidedCheck.setEnabled(true);
-
-            lblProteinDish.setVisible(!isStandaloneRice);
-            proteinDishCombo.setVisible(!isStandaloneRice);
-            lblMuttonSize.setVisible(false);
-            muttonSizeCombo.setVisible(false);
-        }
-
         calculateCateringAndDue();
+        setVisible(true);
     }
 
     private void calculateCateringAndDue() {
         try {
-            String selectedRice = riceDishCombo.getSelectedItem() != null ? riceDishCombo.getSelectedItem().toString() : "";
+            String selectedRice = riceDishCombo.getSelectedItem().toString();
             int riceMun = (int) riceMunSpinner.getValue();
             double riceTotal = orderCalculator.calculateRiceTotal(selectedRice, riceMun);
 
@@ -323,19 +280,15 @@ public class NewOrderFrame extends JFrame {
             int proteinQty = (int) proteinMunSpinner.getValue();
             boolean isCustomerProvided = proteinCustomerProvidedCheck.isSelected();
 
-            String selectedProtein = "";
-            for (Map.Entry<String, JRadioButton> entry : proteinRadioMap.entrySet()) {
-                if (entry.getValue().isSelected()) {
-                    selectedProtein = entry.getKey();
-                    break;
-                }
-            }
-
-            if (selectedProtein.equals("ضأن")) {
-                String muttonSize = muttonSizeCombo.getSelectedItem() != null ? muttonSizeCombo.getSelectedItem().toString() : "";
+            if (rbBeef.isSelected()) {
+                proteinTotal = orderCalculator.calculateBeefTotal(proteinQty, isCustomerProvided);
+            } else if (rbChicken.isSelected()) {
+                proteinTotal = orderCalculator.calculateChickenTotal(proteinQty, isCustomerProvided);
+            } else if (rbFish.isSelected()) {
+                proteinTotal = orderCalculator.calculateFishTotal(proteinQty, isCustomerProvided);
+            } else if (rbMutton.isSelected()) {
+                String muttonSize = proteinDishCombo.getSelectedItem() != null ? proteinDishCombo.getSelectedItem().toString() : "";
                 proteinTotal = orderCalculator.calculateMuttonTotal(muttonSize, proteinQty, isCustomerProvided);
-            } else if (!selectedProtein.isEmpty()) {
-                proteinTotal = priceManager.calculateDynamicProteinTotal(selectedProtein, proteinQty, isCustomerProvided);
             }
 
             double grandTotal = riceTotal + proteinTotal;
@@ -473,18 +426,16 @@ public class NewOrderFrame extends JFrame {
         txtPrice.setText("");
         txtAdvance.setText("");
         txtDue.setText("");
-        riceDishCombo.setModel(new DefaultComboBoxModel<>(orderCalculator.getRiceDishTypes().toArray(new String[0])));
-        riceMunSpinner.setValue(0);
+        riceDishCombo.setSelectedIndex(0);
+        riceMunSpinner.setValue(1);
         proteinMunSpinner.setValue(0);
-
-        if (!proteinRadioMap.isEmpty()) {
-            proteinRadioMap.values().iterator().next().setSelected(true);
-        }
-
+        rbBeef.setSelected(true);
+        lblProteinDish.setText("نوع طبق البقر (Beef Dish):");
+        proteinDishCombo.setModel(new DefaultComboBoxModel<>(CateringOrderCalculator.MEAT_DISH_TYPES));
+        lblProteinQty.setText("كمية البقر (من / Mun):");
         proteinCustomerProvidedCheck.setSelected(false);
         proteinCustomerProvidedCheck.setEnabled(true);
-        muttonSizeCombo.setSelectedIndex(0);
         dateChooser.setDate(new Date());
-        updateProteinUI();
+        calculateCateringAndDue();
     }
 }

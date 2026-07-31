@@ -1,0 +1,280 @@
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+public class CateringPriceManager {
+    private List<String> riceDishTypes;
+    private List<String> proteinTypes;
+    private List<String> beefChickenDishTypes;
+    private List<String> fishDishTypes;
+
+    // Price variables and mappings
+    private Map<String, Double> ricePrices;
+    private Map<String, Double> muttonSizePrices;
+
+    private double beefPricePerMun;
+    private double chickenPricePerMun;
+    private double fishPricePerMun;
+
+    private double beefCookingFeePerMun;
+    private double chickenCookingFeePerMun;
+    private double fishCookingFeePerMun;
+    private double muttonCookingFee;
+
+    public CateringPriceManager() {
+        // Initialize dynamic lists
+        riceDishTypes = new ArrayList<>(Arrays.asList("عيش الأبيض", "عيش المكبوس", "هريس", "عرسية", "ثريد"));
+        proteinTypes = new ArrayList<>(Arrays.asList("بقر", "دجاج", "سمك", "ضأن"));
+        beefChickenDishTypes = new ArrayList<>(Arrays.asList("مكبوس", "برياني", "مضبي"));
+        fishDishTypes = new ArrayList<>(Arrays.asList("صيادية", "مفلق", "مقلي"));
+
+        // Initialize default prices
+        ricePrices = new HashMap<>();
+        ricePrices.put("عيش الأبيض", 4.0);
+        ricePrices.put("عيش المكبوس", 5.0);
+        ricePrices.put("هريس", 6.0);
+        ricePrices.put("عرسية", 6.0);
+        ricePrices.put("ثريد", 5.5);
+
+        muttonSizePrices = new HashMap<>();
+        muttonSizePrices.put("كامل (Full)", 60.0);
+        muttonSizePrices.put("نصف (Half)", 35.0);
+        muttonSizePrices.put("ربع (Quarter)", 20.0);
+
+        beefPricePerMun = 10.0;
+        chickenPricePerMun = 8.0;
+        fishPricePerMun = 12.0;
+
+        beefCookingFeePerMun = 10.0;
+        chickenCookingFeePerMun = 8.0;
+        fishCookingFeePerMun = 12.0;
+        muttonCookingFee = 15.0;
+    }
+
+    // --- Rice Types Management ---
+    public List<String> getRiceDishTypes() {
+        return riceDishTypes;
+    }
+
+    public List<String> getRiceTypes() {
+        return riceDishTypes;
+    }
+
+    public void setRiceTypes(List<String> riceTypes) {
+        if (riceTypes != null) {
+            this.riceDishTypes = new ArrayList<>(riceTypes);
+            for (String type : riceTypes) {
+                if (!ricePrices.containsKey(type)) {
+                    ricePrices.put(type, 5.0);
+                }
+            }
+        }
+    }
+
+    public void addRiceType(String type) {
+        if (type != null && !type.trim().isEmpty() && !riceDishTypes.contains(type.trim())) {
+            riceDishTypes.add(type.trim());
+            ricePrices.put(type.trim(), 5.0);
+        }
+    }
+
+    public void removeRiceType(String type) {
+        riceDishTypes.remove(type);
+        ricePrices.remove(type);
+    }
+
+    // --- Rice Price Getters & Setters ---
+    public double getRicePricePerMun(String riceType) {
+        return ricePrices.getOrDefault(riceType, 5.0);
+    }
+
+    public double getRicePricePerMun() {
+        if (!riceDishTypes.isEmpty()) {
+            return ricePrices.getOrDefault(riceDishTypes.get(0), 5.0);
+        }
+        return 5.0;
+    }
+
+    public void setRicePricePerMun(String riceType, double price) {
+        if (riceType != null && !riceType.trim().isEmpty()) {
+            ricePrices.put(riceType.trim(), price);
+        }
+    }
+
+    public void setRicePricePerMun(double price) {
+        if (!riceDishTypes.isEmpty()) {
+            ricePrices.put(riceDishTypes.get(0), price);
+        }
+    }
+
+    // --- Protein Types Management ---
+    public List<String> getProteinTypes() {
+        return proteinTypes;
+    }
+
+    public void setProteinTypes(List<String> proteinTypes) {
+        if (proteinTypes != null) {
+            this.proteinTypes = new ArrayList<>(proteinTypes);
+        }
+    }
+
+    public void addProteinType(String type) {
+        if (type != null && !type.trim().isEmpty() && !proteinTypes.contains(type.trim())) {
+            proteinTypes.add(type.trim());
+        }
+    }
+
+    public void removeProteinType(String type) {
+        proteinTypes.remove(type);
+    }
+
+    // --- Protein Price Getters & Setters ---
+    public double getBeefPricePerMun() {
+        return beefPricePerMun;
+    }
+
+    public void setBeefPricePerMun(double beefPricePerMun) {
+        this.beefPricePerMun = beefPricePerMun;
+    }
+
+    public double getChickenPricePerMun() {
+        return chickenPricePerMun;
+    }
+
+    public void setChickenPricePerMun(double chickenPricePerMun) {
+        this.chickenPricePerMun = chickenPricePerMun;
+    }
+
+    public double getFishPricePerMun() {
+        return fishPricePerMun;
+    }
+
+    public void setFishPricePerMun(double fishPricePerMun) {
+        this.fishPricePerMun = fishPricePerMun;
+    }
+
+    // --- Cooking Fee Getters & Setters ---
+    public double getBeefCookingFeePerMun() {
+        return beefCookingFeePerMun;
+    }
+
+    public void setBeefCookingFeePerMun(double beefCookingFeePerMun) {
+        this.beefCookingFeePerMun = beefCookingFeePerMun;
+    }
+
+    public double getChickenCookingFeePerMun() {
+        return chickenCookingFeePerMun;
+    }
+
+    public void setChickenCookingFeePerMun(double chickenCookingFeePerMun) {
+        this.chickenCookingFeePerMun = chickenCookingFeePerMun;
+    }
+
+    public double getFishCookingFeePerMun() {
+        return fishCookingFeePerMun;
+    }
+
+    public void setFishCookingFeePerMun(double fishCookingFeePerMun) {
+        this.fishCookingFeePerMun = fishCookingFeePerMun;
+    }
+
+    public double getMuttonCookingFee() {
+        return muttonCookingFee;
+    }
+
+    public void setMuttonCookingFee(double muttonCookingFee) {
+        this.muttonCookingFee = muttonCookingFee;
+    }
+
+    // --- Mutton Size Price Getters & Setters ---
+    public double getMuttonFullPrice() {
+        return muttonSizePrices.getOrDefault("كامل (Full)", 60.0);
+    }
+
+    public void setMuttonFullPrice(double price) {
+        muttonSizePrices.put("كامل (Full)", price);
+    }
+
+    public double getMuttonHalfPrice() {
+        return muttonSizePrices.getOrDefault("نصف (Half)", 35.0);
+    }
+
+    public void setMuttonHalfPrice(double price) {
+        muttonSizePrices.put("نصف (Half)", price);
+    }
+
+    public double getMuttonQuarterPrice() {
+        return muttonSizePrices.getOrDefault("ربع (Quarter)", 20.0);
+    }
+
+    public void setMuttonQuarterPrice(double price) {
+        muttonSizePrices.put("ربع (Quarter)", price);
+    }
+
+    // --- Beef / Chicken Dish Types Management ---
+    public List<String> getBeefChickenDishTypes() {
+        return beefChickenDishTypes;
+    }
+
+    public void setBeefChickenDishTypes(List<String> beefChickenDishTypes) {
+        if (beefChickenDishTypes != null) {
+            this.beefChickenDishTypes = new ArrayList<>(beefChickenDishTypes);
+        }
+    }
+
+    public void addBeefChickenDishType(String type) {
+        if (type != null && !type.trim().isEmpty() && !beefChickenDishTypes.contains(type.trim())) {
+            beefChickenDishTypes.add(type.trim());
+        }
+    }
+
+    public void removeBeefChickenDishType(String type) {
+        beefChickenDishTypes.remove(type);
+    }
+
+    // --- Fish Dish Types Management ---
+    public List<String> getFishDishTypes() {
+        return fishDishTypes;
+    }
+
+    public void setFishDishTypes(List<String> fishDishTypes) {
+        if (fishDishTypes != null) {
+            this.fishDishTypes = new ArrayList<>(fishDishTypes);
+        }
+    }
+
+    public void addFishDishType(String type) {
+        if (type != null && !type.trim().isEmpty() && !fishDishTypes.contains(type.trim())) {
+            fishDishTypes.add(type.trim());
+        }
+    }
+
+    public void removeFishDishType(String type) {
+        fishDishTypes.remove(type);
+    }
+
+    // --- Price Calculations ---
+    public double calculateRiceTotal(String riceType, int mun) {
+        double rate = ricePrices.getOrDefault(riceType, 5.0);
+        return mun * rate;
+    }
+
+    public double calculateBeefTotal(int mun) {
+        return mun * beefPricePerMun;
+    }
+
+    public double calculateChickenTotal(int mun) {
+        return mun * chickenPricePerMun;
+    }
+
+    public double calculateFishTotal(int mun) {
+        return mun * fishPricePerMun;
+    }
+
+    public double calculateMuttonTotal(String size, int quantity) {
+        double rate = muttonSizePrices.getOrDefault(size, 60.0);
+        return quantity * rate;
+    }
+}

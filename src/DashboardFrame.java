@@ -8,13 +8,16 @@ public class DashboardFrame extends JFrame {
     private JButton btnNewOrder;
     private JButton btnViewOrders;
     private JButton btnDelivery;
-    private JButton btnDrivers;
-    private JToggleButton btnThemeToggle;
+    private JButton btnSettings;
     private JButton btnExit;
 
+    private CateringPriceManager priceManager;
+
     public DashboardFrame() {
+        this.priceManager = new CateringPriceManager();
+
         setTitle("Restaurant Management System - Almayda");
-        setSize(500, 550);
+        setSize(500, 520);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLayout(new BorderLayout());
@@ -26,70 +29,43 @@ public class DashboardFrame extends JFrame {
         add(title, BorderLayout.NORTH);
 
         // ===== BUTTON PANEL =====
-        JPanel panel = new JPanel(new GridLayout(6, 1, 15, 15));
-        panel.setBorder(BorderFactory.createEmptyBorder(30, 80, 30, 80));
+        JPanel panel = new JPanel(new GridLayout(5, 1, 15, 15));
+        panel.setBorder(BorderFactory.createEmptyBorder(20, 80, 20, 80));
 
         btnNewOrder = new JButton("New Order");
         btnViewOrders = new JButton("View Orders");
         btnDelivery = new JButton("Delivery Management");
-        btnDrivers = new JButton("Drivers");
-        btnThemeToggle = new JToggleButton("🌙 Dark Mode");
+        btnSettings = new JButton("Settings");
         btnExit = new JButton("Exit");
 
         panel.add(btnNewOrder);
         panel.add(btnViewOrders);
         panel.add(btnDelivery);
-        panel.add(btnDrivers);
-        panel.add(btnThemeToggle);
+        panel.add(btnSettings);
         panel.add(btnExit);
 
         add(panel, BorderLayout.CENTER);
 
-        // ===== NAVIGATION LOGIC (ONE WINDOW AT A TIME) =====
-
-        btnNewOrder.addActionListener(e -> openSubScreen(new NewOrderFrame()));
-
+        // ===== NAVIGATION LOGIC =====
+        btnNewOrder.addActionListener(e -> openSubScreen(new NewOrderFrame(priceManager)));
         btnViewOrders.addActionListener(e -> openSubScreen(new OrderListFrame()));
-
         btnDelivery.addActionListener(e -> openSubScreen(new DeliveryFrame()));
-
-        btnDrivers.addActionListener(e -> openSubScreen(new DriverFrame()));
-
-        // Theme Toggle
-        btnThemeToggle.addActionListener(e -> {
-            if (btnThemeToggle.isSelected()) {
-                btnThemeToggle.setText("☀️ Light Mode");
-                Main.switchTheme(true);
-            } else {
-                btnThemeToggle.setText("🌙 Dark Mode");
-                Main.switchTheme(false);
-            }
-        });
-
-        // Exit Application
+        btnSettings.addActionListener(e -> new SettingsDialog(this, priceManager, "MENU").setVisible(true));
         btnExit.addActionListener(e -> System.exit(0));
 
         setVisible(true);
     }
 
-    /**
-     * Hides the Dashboard and opens the sub-frame.
-     * Restores the Dashboard automatically when the sub-frame is closed.
-     */
     private void openSubScreen(JFrame subFrame) {
-        // 1. Hide the Dashboard
         this.setVisible(false);
 
-        // 2. Listen for when the sub-frame closes (or when Back is clicked)
         subFrame.addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosed(WindowEvent e) {
-                // 3. Show the Dashboard again
                 DashboardFrame.this.setVisible(true);
             }
         });
 
-        // 4. Show the target page
         subFrame.setVisible(true);
     }
 }
